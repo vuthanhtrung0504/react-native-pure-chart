@@ -1,9 +1,9 @@
 import React from 'react'
 import { View, TouchableWithoutFeedback, Text, Animated, Easing, ScrollView, StyleSheet } from 'react-native'
-import {initData, drawYAxis, drawGuideLine, drawYAxisLabels, numberWithCommas, drawXAxis, drawXAxisLabels} from '../common'
+import { initData, drawYAxis, drawGuideLine, drawYAxisLabels, numberWithCommas, drawXAxis, drawXAxisLabels } from '../common'
 
 class LineChart extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
     let newState = initData(this.props.data, this.props.height, this.props.gap, this.props.numberOfYAxisGuideLine)
     this.state = {
@@ -25,7 +25,7 @@ class LineChart extends React.Component {
     this.drawSelected = this.drawSelected.bind(this)
   }
 
-  shouldComponentUpdate (nextProps, nextState) {
+  shouldComponentUpdate(nextProps, nextState) {
     if (nextState.sortedData !== this.state.sortedData ||
       nextState.selectedIndex !== this.state.selectedIndex ||
       nextState.scrollPosition !== this.state.scrollPosition) {
@@ -35,11 +35,11 @@ class LineChart extends React.Component {
     }
   }
 
-  componentDidMount () {
+  componentDidMount() {
     Animated.timing(this.state.fadeAnim, { toValue: 1, easing: Easing.bounce, duration: 1000, useNativeDriver: true }).start()
   }
 
-  componentWillReceiveProps (nextProps) {
+  componentWillReceiveProps(nextProps) {
     if (nextProps.data !== this.props.data) {
       this.setState(Object.assign({
         fadeAnim: new Animated.Value(0)
@@ -49,14 +49,14 @@ class LineChart extends React.Component {
     }
   }
 
-  getTransform (rad, width) {
+  getTransform(rad, width) {
     let x = (0 - width / 2) * Math.cos(rad) - (0 - width / 2) * Math.sin(rad)
     let y = (0 - width / 2) * Math.sin(rad) + (0 - width / 2) * Math.cos(rad)
 
-    return [ {translateX: (-1 * x) - width / 2}, {translateY: (-1 * y) + width / 2}, { rotate: rad + 'rad' } ]
+    return [{ translateX: (-1 * x) - width / 2 }, { translateY: (-1 * y) + width / 2 }, { rotate: rad + 'rad' }]
   }
 
-  drawCoordinate (index, start, end, backgroundColor, lineStyle, isBlank, lastCoordinate, seriesIndex) {
+  drawCoordinate(index, start, end, backgroundColor, lineStyle, isBlank, lastCoordinate, seriesIndex, seriesColor) {
     let key = 'line' + index
     let dx = end.gap - start.gap
     let dy = end.ratioY - start.ratioY
@@ -77,13 +77,13 @@ class LineChart extends React.Component {
     return (
       <View key={key} style={{
         height: this.props.height + topMargin,
-        justifyContent: 'flex-end'
+        justifyContent: 'flex-end',
       }}>
 
         <View style={StyleSheet.flatten([{
           width: dx,
           height: height,
-          marginTop: topMargin
+          marginTop: topMargin,
         }, styles.coordinateWrapper])}>
           <View style={StyleSheet.flatten([{
             top: top,
@@ -91,18 +91,19 @@ class LineChart extends React.Component {
             height: size,
             borderColor: isBlank ? backgroundColor : this.props.primaryColor,
             borderTopWidth: 1,
-            transform: this.getTransform(angleRad, size)
+            transform: this.getTransform(angleRad, size),
+            backgroundColor: isBlank ? 'transparent' : (seriesIndex % 2 !== 0 ? seriesColor : 'transparent')
           }, styles.lineBox, lineStyle])} />
           <View style={StyleSheet.flatten([styles.absolute, {
             height: height - Math.abs(dy) - 2,
-            backgroundColor: lastCoordinate ? '#FFFFFF00' : backgroundColor,
-            marginTop: Math.abs(dy) + 2
+            marginTop: Math.abs(dy) + 2,
+            backgroundColor: isBlank ? 'transparent' : (seriesIndex % 2 !== 0 ? seriesColor : 'transparent')
           }])} />
         </View>
         {!lastCoordinate && seriesIndex === 0 ? (
           <View style={StyleSheet.flatten([styles.guideLine, {
             width: dx,
-            borderRightColor: this.props.xAxisGridLineColor
+            borderRightColor: this.props.xAxisGridLineColor,
           }])} />
         ) : null}
         {seriesIndex === this.state.sortedData.length - 1 && (
@@ -131,7 +132,7 @@ class LineChart extends React.Component {
               height: '100%',
               position: 'absolute',
               marginLeft: -1 * dx / 2,
-              backgroundColor: '#FFFFFF01'
+              backgroundColor: 'transparent'
             }} />
           </TouchableWithoutFeedback>
         )}
@@ -140,7 +141,7 @@ class LineChart extends React.Component {
     )
   }
 
-  drawPoint (index, point, seriesColor) {
+  drawPoint(index, point, seriesColor) {
     let key = 'point' + index
     let size = 8
     let color = !seriesColor ? this.props.primaryColor : seriesColor
@@ -152,7 +153,7 @@ class LineChart extends React.Component {
 
     return (
       <TouchableWithoutFeedback key={key} onPress={() => {
-        this.setState({selectedIndex: index})
+        this.setState({ selectedIndex: index })
       }}>
 
         <View style={StyleSheet.flatten([styles.pointWrapper, {
@@ -169,7 +170,7 @@ class LineChart extends React.Component {
       </TouchableWithoutFeedback>
     )
   }
-  drawValue (index, point) {
+  drawValue(index, point) {
     let key = 'pointvalue' + index
     let size = 200
     return (
@@ -189,7 +190,7 @@ class LineChart extends React.Component {
     )
   }
 
-  drawCustomValue (index, point) {
+  drawCustomValue(index, point) {
     if (this.props.customValueRenderer) {
       return this.props.customValueRenderer(index, point)
     } else {
@@ -197,7 +198,7 @@ class LineChart extends React.Component {
     }
   }
 
-  drawCoordinates (data, seriesColor, seriesIndex) {
+  drawCoordinates(data, seriesColor, seriesIndex) {
     let result = []
     let lineStyle = {
       borderColor: !seriesColor ? this.props.primaryColor : seriesColor
@@ -205,7 +206,7 @@ class LineChart extends React.Component {
     let dataLength = data.length
 
     for (let i = 0; i < dataLength - 1; i++) {
-      result.push(this.drawCoordinate(i, data[i], data[i + 1], '#FFFFFF00', lineStyle, false, false, seriesIndex))
+      result.push(this.drawCoordinate(i, data[i], data[i + 1], '#FFFFFF00', lineStyle, false, false, seriesIndex, seriesColor))
     }
 
     if (dataLength > 0) {
@@ -221,16 +222,16 @@ class LineChart extends React.Component {
     let lastData = Object.assign({}, data[dataLength - 1])
     let lastCoordinate = Object.assign({}, data[dataLength - 1])
     lastCoordinate.gap = lastCoordinate.gap + this.props.gap
-    result.push(this.drawCoordinate((dataLength), lastData, lastCoordinate, '#FFFFFF', {}, true, true, seriesIndex))
+    result.push(this.drawCoordinate((dataLength), lastData, lastCoordinate, 'transparent', {}, true, true, seriesIndex, seriesColor))
 
     return result
   }
 
-  getDistance (p1, p2) {
+  getDistance(p1, p2) {
     return Math.sqrt(Math.pow(p1[0] - p2[0], 2) + Math.pow(p1[1] - p2[1], 2))
   }
 
-  drawSelected (index) {
+  drawSelected(index) {
     if (this.state.sortedData.length === 0) return null
     let data = this.state.sortedData[0].data
     let dataObject = data[index]
@@ -268,8 +269,8 @@ class LineChart extends React.Component {
                 <View key={series.seriesName}>
                   {dataObject.x ? (
                     <Text style={styles.tooltipTitle}>{dataObject.x}</Text>
-                ) : null}
-                  <View style={{flexDirection: 'row', paddingLeft: 5, alignItems: 'center'}}>
+                  ) : null}
+                  <View style={{ flexDirection: 'row', paddingLeft: 5, alignItems: 'center' }}>
                     <View style={{
                       width: 10,
                       height: 5,
@@ -292,8 +293,8 @@ class LineChart extends React.Component {
     }
   }
 
-  render () {
-    let {fadeAnim} = this.state
+  render() {
+    let { fadeAnim } = this.state
     return (
       this.state.sortedData.length > 0 ? (
         <View style={StyleSheet.flatten([styles.wrapper, {
@@ -315,7 +316,7 @@ class LineChart extends React.Component {
                   {this.state.sortedData.map((obj, index) => {
                     return (
                       <Animated.View key={'animated_' + index} style={{
-                        transform: [{scaleY: fadeAnim}],
+                        transform: [{ scaleY: fadeAnim }],
                         flexDirection: 'row',
                         alignItems: 'flex-end',
                         height: '100%',
@@ -418,8 +419,8 @@ const styles = StyleSheet.create({
     marginLeft: 5,
     justifyContent: 'center'
   },
-  tooltipTitle: {fontSize: 10},
-  tooltipValue: {fontWeight: 'bold', fontSize: 15}
+  tooltipTitle: { fontSize: 10 },
+  tooltipValue: { fontWeight: 'bold', fontSize: 15 }
 })
 
 export default LineChart
