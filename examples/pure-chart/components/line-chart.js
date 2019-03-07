@@ -90,22 +90,22 @@ class LineChart extends React.Component {
             width: size,
             height: size,
             borderColor: isBlank ? backgroundColor : this.props.primaryColor,
-            borderTopWidth: 1,
+            borderTopWidth: 2,
             transform: this.getTransform(angleRad, size),
-            backgroundColor: isBlank ? 'transparent' : (seriesIndex % 2 !== 0 ? seriesColor : 'transparent')
+            backgroundColor: isBlank ? 'transparent' : (seriesIndex % 2 !== 0 ? '#DFD5F7' : '#E7F3F9'),
           }, styles.lineBox, lineStyle])} />
           <View style={StyleSheet.flatten([styles.absolute, {
             height: height - Math.abs(dy) - 2,
             marginTop: Math.abs(dy) + 2,
-            backgroundColor: isBlank ? 'transparent' : (seriesIndex % 2 !== 0 ? seriesColor : 'transparent')
+            backgroundColor: isBlank ? 'transparent' : (seriesIndex % 2 !== 0 ? '#DFD5F7' : '#E7F3F9'),
           }])} />
         </View>
-        {!lastCoordinate && seriesIndex === 0 ? (
+        {/* {!lastCoordinate && seriesIndex === 0 ? (
           <View style={StyleSheet.flatten([styles.guideLine, {
             width: dx,
             borderRightColor: this.props.xAxisGridLineColor,
           }])} />
-        ) : null}
+        ) : null} */}
         {seriesIndex === this.state.sortedData.length - 1 && (
           <TouchableWithoutFeedback onPress={() => {
             let selectedIndex = lastCoordinate ? index - 1 : index
@@ -143,8 +143,8 @@ class LineChart extends React.Component {
 
   drawPoint(index, point, seriesColor) {
     let key = 'point' + index
-    let size = 8
-    let color = !seriesColor ? this.props.primaryColor : seriesColor
+    let size = 1
+    let color = seriesColor || this.props.primaryColor 
     if (this.state.selectedIndex === index) {
       color = this.props.selectedColor
     }
@@ -159,9 +159,6 @@ class LineChart extends React.Component {
         <View style={StyleSheet.flatten([styles.pointWrapper, {
           width: size,
           height: size,
-
-          left: point.gap - size / 2,
-          bottom: point.ratioY - size / 2,
 
           borderColor: color,
           backgroundColor: color
@@ -206,7 +203,7 @@ class LineChart extends React.Component {
     let dataLength = data.length
 
     for (let i = 0; i < dataLength - 1; i++) {
-      result.push(this.drawCoordinate(i, data[i], data[i + 1], '#FFFFFF00', lineStyle, false, false, seriesIndex, seriesColor))
+      result.push(this.drawCoordinate(i, data[i], data[i + 1], 'red', lineStyle, false, false, seriesIndex, seriesColor))
     }
 
     if (dataLength > 0) {
@@ -312,7 +309,7 @@ class LineChart extends React.Component {
                 <View ref='chartView' style={styles.chartViewWrapper}>
 
                   {drawYAxis(this.props.yAxisColor)}
-                  {drawGuideLine(this.state.guideArray, this.props.yAxisGridLineColor)}
+                  {/* {drawGuideLine(this.state.guideArray, this.props.yAxisGridLineColor)} */}
                   {this.state.sortedData.map((obj, index) => {
                     return (
                       <Animated.View key={'animated_' + index} style={{
@@ -395,7 +392,6 @@ const styles = StyleSheet.create({
   },
   pointWrapper: {
     position: 'absolute',
-    borderRadius: 10,
     borderWidth: 1
   },
   selectedWrapper: {
